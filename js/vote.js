@@ -20,40 +20,52 @@ const dislikeBtn = document.getElementById('dislike-btn');
 const likeCount = document.getElementById('like-count');
 const dislikeCount = document.getElementById('dislike-count');
 
-// LocalStorage لتتبع vote لكل user
+// LocalStorage: visitor vote tracker
 let userVotes = JSON.parse(localStorage.getItem('userVotes')) || {};
 
-// جلب count global من Firebase
+// 🔹 جلب count global من Firebase
 db.ref('votes/' + slug).on('value', snapshot => {
   const data = snapshot.val() || { likes: 0, dislikes: 0 };
   likeCount.textContent = data.likes;
   dislikeCount.textContent = data.dislikes;
+
+  // update UI buttons color
+  if(userVotes[slug] === 'likes'){
+    likeBtn.style.background = 'green';
+    dislikeBtn.style.background = '';
+  } else if(userVotes[slug] === 'dislikes'){
+    dislikeBtn.style.background = 'red';
+    likeBtn.style.background = '';
+  } else {
+    likeBtn.style.background = '';
+    dislikeBtn.style.background = '';
+  }
 });
 
-// Function to send vote
+// 🔹 Function to send vote
 function sendVote(type){
-  const currentVote = userVotes[slug]; // vote الحالي ديال visitor
+  const currentVote = userVotes[slug];
 
-  if(currentVote === type) return; // ما بدل والو، exit
+  if(currentVote === type) return; // no change
 
   db.ref('votes/' + slug).transaction(current => {
     if(!current) current = { likes: 0, dislikes: 0 };
 
-    // نقص vote القديم إلا كان
+    // decrease old vote if exists
     if(currentVote){
       current[currentVote] = Math.max((current[currentVote] || 1) - 1, 0);
     }
 
-    // زد vote الجديد
+    // increase new vote
     current[type] = (current[type] || 0) + 1;
     return current;
   });
 
-  // حفظ vote visitor ف LocalStorage
+  // save visitor vote in LocalStorage
   userVotes[slug] = type;
   localStorage.setItem('userVotes', JSON.stringify(userVotes));
 }
 
-// Attach click events
+// 🔹 Attach click events
 likeBtn.onclick = () => sendVote('likes');
 dislikeBtn.onclick = () => sendVote('dislikes');
