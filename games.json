@@ -22,21 +22,5 @@
     "rating": 0,
     "players": 0,
     "gradient": "linear-gradient(45deg,#ff0,#0ff)"
-  },
-  {
-    "title": "Longcat",
-    "link": "game/longcat/",
-    "thumbnail": "images/longcat.jpg",
-    "rating": 4.5,
-    "players": 800,
-    "gradient": "linear-gradient(45deg,#0f6,#f84)"
-  },
-  {
-    "title": "Tennis Masters",
-    "link": "game/tennis-masters",
-    "thumbnail": "images/tennis-masters.jpg",
-    "rating": 10,
-    "players": 20,
-    "gradient": "linear-gradient(45deg,#ff0,#0ff)"
   }
 ]
