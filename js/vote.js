@@ -7,43 +7,39 @@ document.addEventListener('DOMContentLoaded', () => {
   const gameContainer = document.querySelector('.game-container');
   const slug = gameContainer.dataset.slug;
 
-  // Load votes and user vote from localStorage
-  const votes = JSON.parse(localStorage.getItem('votes')) || {};
-  const userVotes = JSON.parse(localStorage.getItem('userVotes')) || {}; // stores 'like' or 'dislike'
+  // API URL ديال WordPress
+  const API = "https://funzilo.com/wp-json/votes/v1";
 
-  // Initialize votes if missing
-  if (!votes[slug]) votes[slug] = { likes: 0, dislikes: 0 };
-
-  // Display initial counts
-  likeCount.textContent = votes[slug].likes;
-  dislikeCount.textContent = votes[slug].dislikes;
-
-  function updateVote(newVote) {
-    const oldVote = userVotes[slug]; // current vote of user
-
-    if (oldVote === newVote) return; // no change
-
-    // Decrease old vote if exists
-    if (oldVote) {
-      votes[slug][oldVote]--;
-    }
-
-    // Increase new vote
-    votes[slug][newVote]++;
-
-    // Save new vote
-    userVotes[slug] = newVote;
-
-    // Update localStorage
-    localStorage.setItem('votes', JSON.stringify(votes));
-    localStorage.setItem('userVotes', JSON.stringify(userVotes));
-
-    // Update UI
-    likeCount.textContent = votes[slug].likes;
-    dislikeCount.textContent = votes[slug].dislikes;
+  // function باش نجيب votes من WordPress
+  function loadVotes() {
+    fetch(`${API}/get?slug=${slug}`)
+      .then(res => res.json())
+      .then(data => {
+        likeCount.textContent = data.likes || 0;
+        dislikeCount.textContent = data.dislikes || 0;
+      })
+      .catch(err => console.error("Error loading votes:", err));
   }
 
-  // Attach events
-  likeBtn.addEventListener('click', () => updateVote('likes'));
-  dislikeBtn.addEventListener('click', () => updateVote('dislikes'));
+  // function باش نصيفط vote جديد للWordPress
+  function sendVote(type) {
+    fetch(`${API}/update`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ slug, type })
+    })
+    .then(res => res.json())
+    .then(data => {
+      likeCount.textContent = data.likes || 0;
+      dislikeCount.textContent = data.dislikes || 0;
+    })
+    .catch(err => console.error("Error sending vote:", err));
+  }
+
+  // attach events
+  likeBtn.addEventListener('click', () => sendVote('likes'));
+  dislikeBtn.addEventListener('click', () => sendVote('dislikes'));
+
+  // load initial votes
+  loadVotes();
 });
