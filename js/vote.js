@@ -1,48 +1,44 @@
-document.addEventListener('DOMContentLoaded', () => {
-  const gameContainers = document.querySelectorAll('.game-container');
+// Initialize Firebase
+const firebaseConfig = {
+  apiKey: "AIzaSyBRNoFOHQ2bC6XTliivWfpGMBDfKnR9sko",
+  authDomain: "general-games-2775e.firebaseapp.com",
+  databaseURL: "https://general-games-2775e-default-rtdb.firebaseio.com",
+  projectId: "general-games-2775e",
+  storageBucket: "general-games-2775e.firebasestorage.app",
+  messagingSenderId: "750591153144",
+  appId: "1:750591153144:web:12c8207bc0aa08c2b43c0d",
+  measurementId: "G-5HM7TYMGD9"
+};
 
-  // Load votes and user votes
-  const votes = JSON.parse(localStorage.getItem('votes')) || {};
-  const userVotes = JSON.parse(localStorage.getItem('userVotes')) || {};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
 
-  gameContainers.forEach(container => {
-    const slug = container.dataset.slug;
-    const likeBtn = container.querySelector('.like-btn');
-    const dislikeBtn = container.querySelector('.dislike-btn');
-    const likeCount = container.querySelector('.like-count');
-    const dislikeCount = container.querySelector('.dislike-count');
+const slug = document.querySelector('.game-container').dataset.slug;
+const likeBtn = document.getElementById('like-btn');
+const dislikeBtn = document.getElementById('dislike-btn');
+const likeCount = document.getElementById('like-count');
+const dislikeCount = document.getElementById('dislike-count');
 
-    // Initialize votes if missing
-    if (!votes[slug]) votes[slug] = { likes: 0, dislikes: 0 };
-
-    // Display initial counts
-    likeCount.textContent = votes[slug].likes;
-    dislikeCount.textContent = votes[slug].dislikes;
-
-    function updateVote(newVote) {
-      const oldVote = userVotes[slug];
-
-      if (oldVote === newVote) return; // no change
-
-      // Decrease old vote if exists
-      if (oldVote) votes[slug][oldVote]--;
-
-      // Increase new vote
-      votes[slug][newVote]++;
-
-      // Save new vote
-      userVotes[slug] = newVote;
-
-      // Update localStorage
-      localStorage.setItem('votes', JSON.stringify(votes));
-      localStorage.setItem('userVotes', JSON.stringify(userVotes));
-
-      // Update UI
-      likeCount.textContent = votes[slug].likes;
-      dislikeCount.textContent = votes[slug].dislikes;
-    }
-
-    likeBtn.addEventListener('click', () => updateVote('likes'));
-    dislikeBtn.addEventListener('click', () => updateVote('dislikes'));
-  });
+// Listen for changes in votes
+db.ref('votes/' + slug).on('value', snapshot => {
+  const data = snapshot.val() || { likes: 0, dislikes: 0 };
+  likeCount.textContent = data.likes;
+  dislikeCount.textContent = data.dislikes;
 });
+
+// Function to send vote
+function sendVote(type){
+  db.ref('votes/' + slug).transaction(current => {
+    if(current){
+      current[type] = (current[type] || 0) + 1;
+    } else {
+      current = { likes: 0, dislikes: 0 };
+      current[type] = 1;
+    }
+    return current;
+  });
+}
+
+// Attach click events
+likeBtn.onclick = () => sendVote('likes');
+dislikeBtn.onclick = () => sendVote('dislikes');
