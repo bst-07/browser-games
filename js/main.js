@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // 1. Fetch games JSON w create cards
   const loadGames = async () => {
     try {
-      const res = await fetch('games.json');
+      const res = await fetch('./games.json');
       if (!res.ok) throw new Error("Cannot fetch games.json");
       const games = await res.json();
 
