@@ -32,13 +32,13 @@ function updateIconFill(){
 
   if(userVote === 'likes'){
     likeIcon.setAttribute('fill','currentColor');  
-    dislikeIcon.setAttribute('fill','none');    
-        likeBtn.style.opacity = 0.2;
-    dislikeBtn.style.backgroundColor = 'transparent';
-    dislikeBtn.style.opacity = 1;
+    dislikeIcon.setAttribute('fill','none');   
+    likeIcon.style.backgroundColor = '#7dc597';
+
   } else if(userVote === 'dislikes'){
     dislikeIcon.setAttribute('fill','currentColor');
     likeIcon.setAttribute('fill','none');
+    dislikeIcon.style.backgroundColor = '#eb8d8d';
   } else {
     likeIcon.setAttribute('fill','none');
     dislikeIcon.setAttribute('fill','none');
