@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   // Load header and footer
-  loadHTML("/partials/header.html", "header");
-  loadHTML("/partials/footer.html", "footer");
+  loadHTML("/browser-games/partials/header.html", "header");
+  loadHTML("/browser-games/partials/footer.html", "footer");
 
 });
