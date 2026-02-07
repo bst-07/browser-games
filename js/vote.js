@@ -1,7 +1,8 @@
 
 // Define colors
-const ACCENT_COLOR = "#48a8fa"; // color for the voted icon
-const STROKE_COLOR = "#000";  
+const LIKE_COLOR = "#48a8fa";
+const DISLIKE_COLOR = "#48a8fa"; // color for the voted icon
+
 // Initialize Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyBRNoFOHQ2bC6XTliivWfpGMBDfKnR9sko",
@@ -36,20 +37,20 @@ function updateIconColors() {
   const dislikeIcon = document.querySelector('.dislike-icon');
 
   if (vote === 'likes') {
-    likeIcon.setAttribute('fill', ACCENT_COLOR);   // liked icon fill
-    likeIcon.setAttribute('stroke', ACCENT_COLOR);
+    likeIcon.setAttribute('fill', LIKE_COLOR);   // liked icon fill
+    likeIcon.setAttribute('stroke', LIKE_COLOR);
     dislikeIcon.setAttribute('fill', 'none');      // disliked icon reset
-    dislikeIcon.setAttribute('stroke', STROKE_COLOR);
+    dislikeIcon.setAttribute('stroke', LIKE_COLOR);
   } else if (vote === 'dislikes') {
     dislikeIcon.setAttribute('fill', ACCENT_COLOR); // disliked icon fill
-    dislikeIcon.setAttribute('stroke', ACCENT_COLOR);
+    dislikeIcon.setAttribute('stroke', DISLIKE_COLOR);
     likeIcon.setAttribute('fill', 'none');          // liked icon reset
-    likeIcon.setAttribute('stroke', STROKE_COLOR);
+    likeIcon.setAttribute('stroke', DISLIKE_COLOR);
   } else {
     likeIcon.setAttribute('fill', 'none');          
-    likeIcon.setAttribute('stroke', STROKE_COLOR);
+    likeIcon.setAttribute('stroke', LIKE_COLOR);
     dislikeIcon.setAttribute('fill', 'none');
-    dislikeIcon.setAttribute('stroke', STROKE_COLOR);
+    dislikeIcon.setAttribute('stroke', DISLIKE_COLOR);
   }
 }
 
