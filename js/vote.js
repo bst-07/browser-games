@@ -1,8 +1,4 @@
 
-// Define colors
-const LIKE_COLOR = "#48a8fa";
-const DISLIKE_COLOR = "#48a8fa"; // color for the voted icon
-
 // Initialize Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyBRNoFOHQ2bC6XTliivWfpGMBDfKnR9sko",
@@ -14,7 +10,6 @@ const firebaseConfig = {
   appId: "1:750591153144:web:12c8207bc0aa08c2b43c0d",
   measurementId: "G-5HM7TYMGD9"
 };
-   // color for non-voted icons
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
@@ -26,77 +21,66 @@ const dislikeCount = document.getElementById('dislike-count');
 
 const slug = document.querySelector('.game-container').dataset.slug;
 
-// Visitor vote cache
 let userVotes = JSON.parse(localStorage.getItem('userVotes')) || {};
 let voteQueue = null;
 
-// Update icon colors based on vote
-function updateIconColors() {
-  const vote = userVotes[slug];
+// Update icon fill based on visitor vote
+function updateIconFill(){
+  const userVote = userVotes[slug]; 
   const likeIcon = document.querySelector('.like-icon');
   const dislikeIcon = document.querySelector('.dislike-icon');
 
-  if (vote === 'likes') {
-    likeIcon.setAttribute('fill', LIKE_COLOR);   // liked icon fill
-    likeIcon.setAttribute('stroke', LIKE_COLOR);
-    dislikeIcon.setAttribute('fill', 'none');      // disliked icon reset
-    dislikeIcon.setAttribute('stroke', LIKE_COLOR);
-  } else if (vote === 'dislikes') {
-    dislikeIcon.setAttribute('fill', ACCENT_COLOR); // disliked icon fill
-    dislikeIcon.setAttribute('stroke', DISLIKE_COLOR);
-    likeIcon.setAttribute('fill', 'none');          // liked icon reset
-    likeIcon.setAttribute('stroke', DISLIKE_COLOR);
+  if(userVote === 'likes'){
+    likeIcon.setAttribute('fill','currentColor');  
+    dislikeIcon.setAttribute('fill','none');       
+  } else if(userVote === 'dislikes'){
+    dislikeIcon.setAttribute('fill','currentColor');
+    likeIcon.setAttribute('fill','none');
   } else {
-    likeIcon.setAttribute('fill', 'none');          
-    likeIcon.setAttribute('stroke', LIKE_COLOR);
-    dislikeIcon.setAttribute('fill', 'none');
-    dislikeIcon.setAttribute('stroke', DISLIKE_COLOR);
+    likeIcon.setAttribute('fill','none');
+    dislikeIcon.setAttribute('fill','none');
   }
 }
 
-// Listen Firebase real-time votes
+// Listen to global votes in real-time
 db.ref('votes/' + slug).on('value', snapshot => {
   const data = snapshot.val() || { likes: 0, dislikes: 0 };
   likeCount.textContent = data.likes;
   dislikeCount.textContent = data.dislikes;
-  updateIconColors();
+  updateIconFill();
 });
 
-// Push vote to Firebase with transaction
-function pushVote(type) {
+// Push vote to Firebase
+function pushVote(type){
   const oldVote = userVotes[slug];
 
   db.ref('votes/' + slug).transaction(current => {
-    if (!current) current = { likes: 0, dislikes: 0 };
+    if(!current) current = { likes: 0, dislikes: 0 };
 
-    if (oldVote && current[oldVote] > 0) current[oldVote]--;
+    if(oldVote) current[oldVote] = Math.max((current[oldVote] || 1) - 1, 0);
     current[type] = (current[type] || 0) + 1;
+
     return current;
-  }, (err, committed) => {
-    if (committed) {
-      userVotes[slug] = type; 
+  }, (error, committed) => {
+    if(committed){
+      userVotes[slug] = type;
       localStorage.setItem('userVotes', JSON.stringify(userVotes));
       voteQueue = null;
-      updateIconColors();
-    } else if (err) {
-      console.error(err);
+      updateIconFill();
+    } else if(error){
+      console.error(error);
     }
   });
 }
 
-// Debounce rapid votes
-function handleVote(type) {
-  if (voteQueue === type) return;
+// Handle clicks with cache (debounce)
+function handleVote(type){
+  if(voteQueue === type) return;
   voteQueue = type;
   setTimeout(() => {
-    if (voteQueue) pushVote(voteQueue);
+    if(voteQueue) pushVote(voteQueue);
   }, 300);
 }
 
-// Attach events
 likeBtn.onclick = () => handleVote('likes');
 dislikeBtn.onclick = () => handleVote('dislikes');
-
-// Initialize on load
-updateIconColors();
-
